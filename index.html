@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>YTspike 받기</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d1016;
+    --surface: #151a23;
+    --border: #252c3a;
+    --text: #e6eaf0;
+    --dim: #98a3b2;
+    --faint: #6a7482;
+    --accent: #e0383e;
+    --ok: #3fb950;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Malgun Gothic', -apple-system, system-ui, sans-serif;
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 30px 26px;
+  }
+  h1 { margin: 0 0 6px; font-size: 20px; }
+  p.lead { margin: 0 0 22px; font-size: 13.5px; color: var(--dim); line-height: 1.65; }
+  label { display: block; font-size: 12px; color: var(--faint); margin-bottom: 7px; }
+  input {
+    width: 100%;
+    padding: 14px 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: Consolas, monospace;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    text-align: center;
+    outline: none;
+  }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(224,56,62,.22); }
+  button {
+    width: 100%;
+    margin-top: 12px;
+    height: 44px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .45; cursor: default; }
+  .msg { margin-top: 14px; font-size: 13px; line-height: 1.6; }
+  .msg.bad { color: var(--accent); }
+  .done { margin-top: 18px; padding: 16px; border: 1px solid var(--ok); border-radius: 10px; }
+  .done a {
+    display: block;
+    margin-top: 10px;
+    padding: 12px;
+    text-align: center;
+    background: var(--ok);
+    color: #06220c;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  .note { margin-top: 20px; font-size: 11.5px; color: var(--faint); line-height: 1.7; }
+  @media (max-width: 480px) { input { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>YTspike 받기</h1>
+  <p class="lead">신청하실 때 정하신 <strong>숫자 6자리</strong>를 넣어 주세요.</p>
+
+  <label for="code">번호 6자리</label>
+  <input id="code" inputmode="numeric" autocomplete="off" placeholder="——————" autofocus />
+  <button id="go" disabled>확인</button>
+
+  <div id="msg" class="msg"></div>
+
+  <p class="note">
+    이 번호는 프로그램을 처음 켤 때도 그대로 씁니다. 잊지 않도록 메모해 두세요.<br />
+    번호가 기억나지 않으시면 신청하신 메일로 문의해 주세요.
+  </p>
+</div>
+
+<script>
+const SALT = "/aJa3RyxM65Uh2sZx6ChTA==";
+const ITER = 1200000;
+const BLOBS = ["nZieonQgGa7klj48.nWYS2xLKk8m5tsi7M74SXnzRdIWhcKyXJuLju1x2+Lvr6HOy3XYmCaNyf1XX3BPy+CfB9l1kMm393oZnjgGJGAVL8YloibnFtw6kpJYgPxMAg+bk7ZEktXjgqwf9Vda9FRiWRNlAeQ1VCKkB/ha7asiu","l+pXngYPqMUxFiiW.nOv79kklcalTwQWRkvHX3XpBiHfRPEMmFk/DA9Dwn3KZfQq7LwtOMZh+y9BwA9txvdhl9YDxfuLMpZakHTXF1kJAiZXd5df034BSc5wS1HZydLWT80d0rrLjwcsQ5tVR2DWiUDCY8xcJhLpt4Pcb1s6l","uhC4pqlXElPn02A8.TXiaT0x1FKKR04SxtFFAA32yrins1Ej7Lbv4Bnv7TOP2T8rxNi/TnPEOvQ5ymO5EJgPoO8wPX9mBsvizIGDXE58quekjHrCLZ+CYhoviKIytha9pH8HBQ1wnysSBow/5VGpCzcGD/czhMI7HgDBFdV8+","CO04gU48uLqmEGfN.VzDhoKgF0s+mgerk8gpC+rAJ7AAWG9YJEmiQ+6tB9xH70zB+Yn21y6J8aybjKRdv6qMn5i9tBLE+ADwKrmM35Oa+dpSBhrmgu5md4SrXe+ZA9/2B6XLLO6iPS7fjF8bfzS9bcLLR+nU0WWGqA+69nGC6","dIjjjq3GfFPtM7bg.DdoFysPogoW2X7MO6yvOAHTcoMERZyKNQF0km9Djuqnvzkzyi7awzj1SmVPsGfC0jsw6PwRf/44McDd+A6KEehLeEziMXtxbzWfU6RszJ3J/3lhnBqSGxzotG4krInSMROsyZQZV+MFzfn7A2onn3cfH","YHUD+mPAyt5u1kxR.mc8y5D6offwSR3thv8g/1gsu4nWwZxo+I5YBwUOW/Iriw4T5T6TWmXYopCHNSzCInHs4D67rPxfngzF/8aT066kDd/bF2jJVbmqvG/QB67KUz0jXb38QhpjJWJq+0LYLp+sD1rUcBHILz4WSjzwKovWu","pdIh0cj2raA4JWC0.rXdikxhu14hATQDHqmOUGP3VmG4RmVPeSprnKsROgfFQVSeGIgHKzL+3ZQWO465ljWwpAkWttmxyS2/dva0Lfew/qoByNQphuN5jGafaUbW1Hgb6nZzMA8H9RGC3QEVnzfALvI/JMQfgzGRkA1OMeuVJ","h2VU31GMTrMXJ3wX.oma9ZJilgbUe+OJNrP9i4eoLasM0hE4HBHgO2e/a9GFQFHV8HGK+rOI0tm/U8qyRvY5YrhBnVyn9A2B+ArWH+sugvvSbetGW2wKmxXIPh+GZnMgoqCw8xaR5UXvwlJeBsfbVtjanwjyL1l+m7+qM4D4e","/Oh6rMIW2q6u5tal.gUB/Xw4Zp1cJ/T2BoY5olkqEI6IlwQio6mK2ZAiR+4o0iLrmYN8Zp++dRQV23axWAW5tSYMcUSPFw/BNcmpyDuV8kcZcV/6gn+n3DlZdU+/AlIZHWc2juOXGTKXvnRbyjMgPOWrq0qlfrVTAO4f/rAyY","pf6sD9Oobn/3mI5D.rIZewTTA2pqxaRUVETMyBdAobyFoIDie7UJMgJy/Xam+DJbWx780L6fsWmPLkHvJcgX4EZarqaNmc7CWWEsACeXabMvDEbzAuFl7wIvSN5n3V39Ah7k1QtaP1xw9iX8cKELmR3Td7Hp31xcj2KFN2+ij","BjcWimKue/++ZPa2.JpbPfwL5GkuobE4DeTd4zuLlS6ROXmjg+/cOvTue7M7Xgn+fg67hlaW1FhXB130zucoiZ/c+Q7Fm9RwhXy/C7EfZXNKJUGHBM43rZ/L/hF47Oisy5RWmMxQ/vqtAO0StKMf6k9qTRqz8YJ8f3nyV1loa","FLFyalP+Z+U+yqmg.PSWqLxAPRBBbC/v01mWUmiYsSEhIHbHJxUG5oa3loRie7W59ZmLXrusimodmmamYJeqndW9UZqeXfy+g9QfzZfTg2Lftxn8ux5V5cEDtlpnxIVdcqhLYMjgH034CATrw8+ndk/a2pvz2ftJGzjqvFfIA","B9GcVvGCQaSW2gte.70g19HZChCgzV8zG36x48AD9V50421eieHWv2UB5q9KeGiFg7CXtOjeFAljuJsCKA/919rLS1UjeL3ThzStSWDnf81B0Gx+VygV4d1m0oOQpGG/busVKGdaESMPcnEMJwa3tDa94723Ot7EIzy1llYUR","YGu5ZU/YWjueOv9d.R0jZItBbmLZL1j8nS2kJ1ZKe/0JyVQUC/RQcgTtjVc4xQ/nUh3H8EXyIaz6JugP0cWFjT0aZykZSw6ui6nugLvGYtIP0enxIFoLB7xH3lqbHa5tEEtKyrCoxsehQqYhJz8MLQL9VkOfIYf3uW7w/xQOP","7Cn7ICkZYm/wgjIm.w3753kp3i3DFx1ew47bpzmRt0PNWwsuDZpKQl9uFLJ5ITNPcXKZEuyyZaE3xKcEHk2RHTqaquSi4lovD/heumK3j4fqo53kHx8EzHHEKrZHFj9282kP1Cr4DcJ4yg69HyQK0lYuoZbsIXEt6++WgZuMQ","8qM+oI3UwBGITSfN.0ibYODmbEsCL9vj5vQ2Et15N5U6ntYZsHj3rp/lmMgELWRHyKKn6KkejFtqZM3i9v7TKEOfnABCLX3cfUy+XeHlna318H03XyfbRmX7Ihsh2cY0DLGVoQkxuDh2eqhAc3cChzoGCGfkFieUTXV2kvbyd","C3A32r+3upP4Unv/.fgwcdBYLFw9znOM76IrbmeB7J7u9aBWUtEQUJlh2ZtlbghnqY5E6cO3PmLAGyLaxzbw0C1VAbmJGc6LH2QbXRyIpSzLdGFdxKggto3BBoaR2OcB5qG3kZnxFqfjtKgOrcUjxAV5RZUAAQKtaG1O7H5qb","LuQ82GoTOmx/MYAY.aP6Gw5vXOA3X+Djh4SOj5Gc5b2oCY/r/kw2UNDQ7w6InnXDritFVK849PaWgWGRcR0wA4B8UUqmz/8zHLtyb6M3oaopeZDmdgbxwTz8n4nXmBqJ8FG9SYoAhmiSGz9XsCVGpThJdYTiytXNRTtKsiZy/","SZ/T02ayjS8xCfad.eLx+sGuO7n9yH4qAALjYdRVqKrRXMFhllvfDUHCnzlQtPAvhpx6ji8WQEWG2y/7cv1lCidSWhPCHn3zEXf8svh3R8PCOYX4TbIlTkS30zLF58VDd8BCmzhughZU7YnKLdmsfxrxG4xeYURtwHcu5I/bs","LNb1VlTvjG61StaT.LXAmyIKNqlRDg5Li5UtCIPD7yJ8nneJibGRt1aF8QNOD/7iZRCGTogPCNRCgEsCsVXOLKrYogEZXBnBtCB3JDUdGIw6LgIijmhR0i0YZqBw8ouL8nxScm0GwW3moUB2/46RU9WcB8d7mzCpuQVGa7I+X","v9zj7Wv5t2+0C7lo.cPcnLNTMvjyOE8R7hOOLPUNZngSs61VppT+B6lri7mpwvrF+FfGZsHEsM3oK5Lw7fZGzu+NF29vLfFN033WG+4zONtOIXhaJ6ioFDHiSHqtZYbiwc6SCRZ7yM21oWVDv66NJ8fXquVg1uopXShspADYb","q6s2WFiZjzdT0Tw8.6P0PhGUAuCiT/JYETP3Iz5EQlO61B69gSalHY1ZgkEv/N21UZr0XeT5jUH7kIYv5Mx3NNpUuSrUOz8hlJaYcNXNir4utDzTSeyILkT6/5u77gdFbEqUiDhY4i1uEM2C/pP2nBMT0mNAm0zYkvBi+kzD6","lr66jwagb0XALhlC.NvFV2QubNJDAnsNbMmfE6BSgSlvLfXDbEhZW51qSCblKJu+63kJG7x0dH8Ygc7Cf3lFco2OFByKHw0Bp0ru278jqd+Kfp0jBly/FCphHFvdDexQq8Btia3Mv0CZ6Hj+jn0zON7GeWywuNhzNfptj9rcS","gX4Xg7f381UGgdMb.99papmjRw7iQ+0WymODCSG5NS3zziVg4iQzwiV/5YvVNH98bBT1J51hKBxHYlnYyNW9QEXvbh5KaV0aOYQm7Mgs/YXSe1WRkgna6VVNb2+12pteljrQXoBDuHYp4Bl6XvHJQn/BGZFe3qicVAYstslsA","9oqSIdegMxSNkdRh.W22b0MItxi+LsiAhMo6wQQZOheUPZ5SE95N395q++pSNqjDMMtmCK4UFHZcRMc5AqXwE6oxA5ifZo4e5BQEmxW4Enp31i4QDVt3xqRUmzx6iOU9YtUe2ouIM9OKpxgytfaF0JUGBEgZkEsxrPeGSY2/0","iN2zmjmFGSg3wWLZ.khPkBatF7UA5AHWeGqxA9uyIDi4sGYuY+Cqged3HbACZ9YcGwgV+k0c8wCjklcVhjXSglnOQDq5g+x0wu4wqBQaUtG+1V/qzPKEwd7KgI/OsMf9+NNKND7XECFx1R9nLwIKAikLdPFYBPCONpfP/jW0s","+6n+VQRZd8orwPh/.BF/+mb1nXSMsbuK/bvlECjl64Q+VyrrVZfwOBCAKY436PyF0WHZ7DG1wTgdLd2KhnyJ68S1s5oh+atfSZ8oB9RL0DTGz0EH7v8PcpTKXIWvMU9ocUeMNR3SEPBOO/O3RTvCMrwXQFsyAUP0tHqe6DW9V","cYVQ9m+fSemLY3by.maFAggAu4fCqa63MWKv48n0F7Ec3LTJKvezBLU7VdlymBdvo8h+DGzo8HS5dDDrhSQ5s2QpMFirN4sQjbBB1SYkoYROBBAioK41A5siSbROD6J8XXpOzBzZz8BIzFdwaCJPItqILD8Gz4/6o77onL8k3","hby+3M7GcrdNgwJ7.wIhMfVLyL1K3w8xHRBQBtV8xl1zOA0CumSx+jq++UZGg9k4TLDmjk/KEFPAWJk5YWkk+EiceJNuC/jgPdQolE41p4tYLj87/qjsl0PRjt0H1QIOYc3lUH0DWiuODmYvy+gvcHTZw/jp9QJ1+4t7K2gGu","tc9z8u/J9Dfn2sBl.ufTLIquChb3+YmQcuAk/25Lcu5ZTYqqUL/m8JqsrwneUsIQ2rfwOEfYyNeGqEZ9+rYjl6hNJ1LXEJ/KSobYbYAh4zFyOzP0xzyq8kZP7vb8vSkmKTCjuJK14vVOpQrRwbgg5zfWD/mYMpv6zuNoiselq","l5DDaaFGdP20yjHU.01iWx1obuIIdRvY4RYunCKFGydxz85BTDwdXjMzC4/zijcn1PAttLZV5QTh7oXdGbfVZp4dpR+PBaDRNAIpx3pjDuv5fz+0l3ualNvkHY7Vg9/u5ODyBM1j+QrU6wYZyYnp8KagmU/vnLckK6NOoHD34","PsZkiCmkRA4Htk0W.hk3sV5XNfanQ95wQe91sJEwmVWuXHWx1ssFYYiVZYXmd+Ht1BWPN1ZYqBzWcMuqThEc9gc84fxyRiz/ZWlvQWkKFzGSUEdK8l7C4LY8uFd/Q3A1YMBabNyez1Tk0d5iGStwpTnCEU8r+KECXYR1HpSnj","EOo4pdrR+c/O/3kf.wDsgGot+AfJ2uGKIEPrJW7LRXFZPd+fygTpFKtiDSngj28XW0fkrNv+nIh1lHuYydzF5zZPU6GFFy1rqMhDGp5z2m8XHqig4iM9c6WZ03RqTFCALATlmnWfQ++R34I1/X9ED35KaAYelcWD3NGiVQxaT","1MhQN4MKac0JpHp+.34YJTAAU1duei3uoVkaJXguQk+P3N3MJ9I/sbUjvHk82qH/FlRVxyv4nlaJH1qMWQE7mQ3iZrJrjOt46I6Jma8SHkmF178DhejEDwW+eNyaBrRpFzRd7+X/5PKOD4KVntw0YL3NPtgDA1npSa6tylCNt","+VLQ2NeEJlBDcZG5.3eIzv2uvN/j6V5ecPlcodQQuERlk6gjjnpuvXYBa7KBNkDzum17T9A/GnsamhFhh35gckh3FW9otI+Gp0ZnJiI+ZnBGP8HKDwmvjgM9hXXyeoFSqb4z51agRMTxbXMS5XCCQX9C6sLxcZEgsCUAJHd5A","gCj2c87zFAdB0vSN.Sba37E7rbkRT5WPB3cegF6eAZCaqtshzUQK6UcehZYQcCBUc1ic3jnOVsHIDgKFdT9T1AgeBrHQhd3nHlK9z02L3V7cpqIMOyl18fhah9Q6TpkIfnIePceS5yKPHwMzmvR37JI6QydPQjeXD5CQRSd3t"];
+
+const el = (id) => document.getElementById(id);
+const bin = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+el("code").addEventListener("input", (e) => {
+  e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
+  el("go").disabled = e.target.value.length !== 6;
+  el("msg").textContent = "";
+});
+el("code").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !el("go").disabled) check();
+});
+el("go").addEventListener("click", check);
+
+async function check() {
+  const code = el("code").value;
+  el("go").disabled = true;
+  el("msg").className = "msg";
+  // 일부러 느리게 도는 구간이라 먼저 알려 준다
+  el("msg").textContent = "확인하는 중…";
+
+  try {
+    const base = await crypto.subtle.importKey(
+      "raw", new TextEncoder().encode(code), "PBKDF2", false, ["deriveKey"]
+    );
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: bin(SALT), iterations: ITER, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+    );
+
+    for (const blob of BLOBS) {
+      const [iv, ct] = blob.split(".");
+      try {
+        const out = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: bin(iv) }, key, bin(ct)
+        );
+        return show(new TextDecoder().decode(out));
+      } catch (_) {
+        // 이 번호의 것이 아니면 그냥 다음 것을 본다
+      }
+    }
+
+    el("msg").className = "msg bad";
+    el("msg").textContent = "등록되지 않은 번호입니다. 신청하실 때 적으신 숫자가 맞는지 확인해 주세요.";
+  } catch (err) {
+    el("msg").className = "msg bad";
+    el("msg").textContent = "확인에 실패했습니다. 새로고침 후 다시 시도해 주세요.";
+  } finally {
+    el("go").disabled = el("code").value.length !== 6;
+  }
+}
+
+function show(url) {
+  el("msg").className = "msg";
+  el("msg").innerHTML =
+    '<div class="done">확인되었습니다. 아래에서 받으세요.' +
+    '<a href="' + url.replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">다운로드</a>' +
+    "</div>";
+  el("go").style.display = "none";
+  el("code").disabled = true;
+}
+</script>
+</body>
+</html>
